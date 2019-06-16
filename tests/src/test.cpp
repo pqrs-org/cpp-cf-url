@@ -16,6 +16,16 @@ TEST_CASE("make_string") {
   CFRelease(url);
 }
 
+TEST_CASE("make_url") {
+  auto url = pqrs::cf::make_url("https://pqrs.org/");
+  REQUIRE(url);
+
+  auto s = pqrs::cf::make_string(*url);
+  REQUIRE(s);
+
+  REQUIRE(*s == "https://pqrs.org/");
+}
+
 TEST_CASE("make_file_path_url") {
   {
     auto url = pqrs::cf::make_file_path_url("/bin/ls", false);

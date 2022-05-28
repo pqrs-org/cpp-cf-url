@@ -1,48 +1,53 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
-
+#include <boost/ut.hpp>
 #include <pqrs/cf/url.hpp>
 
-TEST_CASE("make_string") {
-  auto url = CFURLCreateWithString(kCFAllocatorDefault,
-                                   CFSTR("https://pqrs.org/"),
-                                   nullptr);
-  REQUIRE(url);
+int main(void) {
+  using namespace boost::ut;
+  using namespace boost::ut::literals;
 
-  auto s = pqrs::cf::make_string(url);
-  REQUIRE(s);
+  "make_string"_test = [] {
+    auto url = CFURLCreateWithString(kCFAllocatorDefault,
+                                     CFSTR("https://pqrs.org/"),
+                                     nullptr);
+    expect(url);
 
-  REQUIRE(*s == "https://pqrs.org/");
-  CFRelease(url);
-}
+    auto s = pqrs::cf::make_string(url);
+    expect(s != std::nullopt);
 
-TEST_CASE("make_url") {
-  auto url = pqrs::cf::make_url("https://pqrs.org/");
-  REQUIRE(url);
+    expect(*s == std::string("https://pqrs.org/"));
+    CFRelease(url);
+  };
 
-  auto s = pqrs::cf::make_string(*url);
-  REQUIRE(s);
-
-  REQUIRE(*s == "https://pqrs.org/");
-}
-
-TEST_CASE("make_file_path_url") {
-  {
-    auto url = pqrs::cf::make_file_path_url("/bin/ls", false);
-    REQUIRE(url);
+  "make_url"_test = [] {
+    auto url = pqrs::cf::make_url("https://pqrs.org/");
+    expect(url.get() != nullptr);
 
     auto s = pqrs::cf::make_string(*url);
-    REQUIRE(s);
+    expect(s != std::nullopt);
 
-    REQUIRE(*s == "file:///bin/ls");
-  }
-  {
-    auto url = pqrs::cf::make_file_path_url("/bin", true);
-    REQUIRE(url);
+    expect(*s == "https://pqrs.org/");
+  };
 
-    auto s = pqrs::cf::make_string(*url);
-    REQUIRE(s);
+  "make_file_path_url"_test = [] {
+    {
+      auto url = pqrs::cf::make_file_path_url("/bin/ls", false);
+      expect(url.get() != nullptr);
 
-    REQUIRE(*s == "file:///bin/");
-  }
+      auto s = pqrs::cf::make_string(*url);
+      expect(s != std::nullopt);
+
+      expect(*s == "file:///bin/ls");
+    }
+    {
+      auto url = pqrs::cf::make_file_path_url("/bin", true);
+      expect(url.get() != nullptr);
+
+      auto s = pqrs::cf::make_string(*url);
+      expect(s != std::nullopt);
+
+      expect(*s == "file:///bin/");
+    }
+  };
+
+  return 0;
 }

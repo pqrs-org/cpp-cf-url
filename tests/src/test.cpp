@@ -4,6 +4,7 @@
 int main(void) {
   using namespace boost::ut;
   using namespace boost::ut::literals;
+  using namespace std::literals;
 
   "make_string"_test = [] {
     auto url = CFURLCreateWithString(kCFAllocatorDefault,
@@ -12,40 +13,50 @@ int main(void) {
     expect(url);
 
     auto s = pqrs::cf::make_string(url);
-    expect(s != std::nullopt);
+    expect(std::nullopt != s);
 
-    expect(*s == std::string("https://pqrs.org/"));
+    expect("https://pqrs.org/"sv == *s);
     CFRelease(url);
   };
 
   "make_url"_test = [] {
     auto url = pqrs::cf::make_url("https://pqrs.org/");
-    expect(url.get() != nullptr);
+    expect(nullptr != url.get());
 
     auto s = pqrs::cf::make_string(*url);
-    expect(s != std::nullopt);
+    expect(std::nullopt != s);
 
-    expect(*s == "https://pqrs.org/");
+    expect("https://pqrs.org/"sv == *s);
   };
 
   "make_file_path_url"_test = [] {
     {
       auto url = pqrs::cf::make_file_path_url("/bin/ls", false);
-      expect(url.get() != nullptr);
+      expect(nullptr != url.get());
 
       auto s = pqrs::cf::make_string(*url);
-      expect(s != std::nullopt);
+      expect(std::nullopt != s);
 
-      expect(*s == "file:///bin/ls");
+      expect("file:///bin/ls"sv == *s);
     }
     {
       auto url = pqrs::cf::make_file_path_url("/bin", true);
-      expect(url.get() != nullptr);
+      expect(nullptr != url.get());
 
       auto s = pqrs::cf::make_string(*url);
-      expect(s != std::nullopt);
+      expect(std::nullopt != s);
 
-      expect(*s == "file:///bin/");
+      expect("file:///bin/"sv == *s);
+    }
+    // With a white space
+    {
+      auto url = pqrs::cf::make_file_path_url("/System/Applications/Utilities/Activity Monitor.app", true);
+      expect(nullptr != url.get());
+
+      auto s = pqrs::cf::make_string(*url);
+      expect(std::nullopt != s);
+
+      expect("file:///System/Applications/Utilities/Activity%20Monitor.app/"sv == *s);
     }
   };
 

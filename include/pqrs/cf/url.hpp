@@ -13,7 +13,7 @@
 namespace pqrs {
 namespace cf {
 inline std::optional<std::string> make_string(CFURLRef url) {
-  return pqrs::cf::make_string(CFURLGetString(url));
+  return make_string(CFURLGetString(url));
 }
 
 inline cf_ptr<CFURLRef> make_url(const std::string& file_path) {

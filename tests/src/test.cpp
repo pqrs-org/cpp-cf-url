@@ -1,22 +1,23 @@
 #include <boost/ut.hpp>
 #include <pqrs/cf/url.hpp>
 
-int main(void) {
+int main() {
   using namespace boost::ut;
   using namespace boost::ut::literals;
   using namespace std::literals;
 
   "make_string"_test = [] {
-    auto url = CFURLCreateWithString(kCFAllocatorDefault,
-                                     CFSTR("https://pqrs.org/"),
-                                     nullptr);
+    auto url = pqrs::cf::adopt_cf_ptr(CFURLCreateWithString(kCFAllocatorDefault,
+                                                            CFSTR("https://pqrs.org/"),
+                                                            nullptr));
     expect(url);
 
-    auto s = pqrs::cf::make_string(url);
+    auto s = pqrs::cf::make_string(*url);
     expect(std::nullopt != s);
 
     expect("https://pqrs.org/"sv == *s);
-    CFRelease(url);
+
+    expect(std::nullopt == pqrs::cf::make_string(static_cast<CFURLRef>(nullptr)));
   };
 
   "make_url"_test = [] {
